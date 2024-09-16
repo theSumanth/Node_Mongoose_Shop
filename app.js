@@ -57,20 +57,6 @@ mongoose
   .connect(KEYS.MONGO_CONNECTION_URI)
   .then(() => {
     console.log("connected to the database");
-    return User.findById("66e27023266d85648842863f");
-  })
-  .then((user) => {
-    if (!user) {
-      const newUser = new User({
-        username: "sumanth",
-        email: "test@gmail.com",
-        cart: { items: [], quantity: 0 },
-      });
-      return newUser.save();
-    }
-    return user;
-  })
-  .then(() => {
     app.listen(KEYS.PORT, () => {
       console.log(`listening to port ${KEYS.PORT}`);
     });
