@@ -61,8 +61,8 @@ exports.postEditProduct = async (req, res, next) => {
   const updatedDesc = req.body.description;
 
   try {
-    await Product.findByIdAndUpdate(
-      { _id: prodId },
+    await Product.updateOne(
+      { _id: prodId, userId: req.user._id },
       {
         title: updatedTitle,
         price: updatedPrice,
@@ -79,7 +79,7 @@ exports.postEditProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find({ userId: req.user._id });
     res.render("admin/products", {
       prods: products,
       pageTitle: "Admin Products",
@@ -94,7 +94,7 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   try {
-    await Product.findByIdAndDelete({ _id: prodId });
+    await Product.deleteOne({ _id: prodId, userId: req.user._id });
     console.log("DELETED THE PRODUCT");
     res.redirect("/admin/products");
   } catch (err) {
