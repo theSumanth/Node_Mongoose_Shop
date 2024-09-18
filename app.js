@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDbStore = require("connect-mongodb-session")(session);
+const flash = require("connect-flash");
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
@@ -36,6 +37,8 @@ app.use(
     store: store,
   })
 );
+
+app.use(flash());
 
 app.use(async (req, res, next) => {
   try {

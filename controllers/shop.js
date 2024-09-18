@@ -93,7 +93,7 @@ exports.postOrder = async (req, res, next) => {
   });
   try {
     const order = new Order({
-      user: { username: username, email: email, userId: _id },
+      user: { email: email, userId: _id },
       products: products,
     });
 
@@ -113,6 +113,7 @@ exports.getOrders = async (req, res, next) => {
       path: "products.productId",
       select: "title",
     });
+
     res.render("shop/orders", {
       path: "/orders",
       pageTitle: "Your Orders",

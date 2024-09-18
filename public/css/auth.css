@@ -4,3 +4,21 @@
   margin: auto;
   display: block;
 }
+
+.centered {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.error {
+  width: 20rem;
+  max-width: 90%;
+  margin: auto;
+  display: block;
+  text-align: center;
+  padding: 10px;
+  color: rgb(156, 18, 18);
+  background-color: rgb(255, 164, 164);
+  font-size: smaller;
+  font-weight: bold;
+}
