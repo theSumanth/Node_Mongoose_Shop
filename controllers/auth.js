@@ -15,7 +15,6 @@ exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
     pageTitle: "Sign Up",
     path: "/signup",
-    isAuthenticated: false,
     errorMessage: message,
   });
 };
@@ -64,7 +63,6 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
-    isAuthenticated: false,
     errorMessage: message,
   });
 };
@@ -115,7 +113,6 @@ exports.getReset = (req, res, next) => {
     pageTitle: "Reset Password",
     path: "/reset",
     errorMessage: message,
-    isAuthenticated: false,
   });
 };
 
@@ -144,7 +141,7 @@ exports.postReset = async (req, res, next) => {
         text: "Please use below link to reset your password",
         html: `
           <h1>Reset Your Password</h1>
-          <h5>Please <a href='http://localhost:3000/reset/${token}'>click here</a> to change the password.</h5>
+          <h5>Please <a href='${KEYS.API_BASE_URL}/reset/${token}'>click here</a> to change the password.</h5>
         `,
       };
 
@@ -175,7 +172,6 @@ exports.getNewPassword = async (req, res, next) => {
       errorMessage: message,
       token: token,
       userId: user._id,
-      isAuthenticated: false,
     });
   } else {
     req.flash("error", "Something wrong happened!");
