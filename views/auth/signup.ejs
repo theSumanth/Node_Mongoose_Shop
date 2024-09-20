@@ -12,15 +12,33 @@
         <form class="login-form" action="/signup" method="POST">
             <div class="form-control">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email">
+                <input 
+                    type="email" 
+                    name="email" 
+                    id="email" 
+                    value="<%= oldInputs.email %>"
+                    class="<%= validationErrors.find(err => err.path === 'email') ? 'invalid' : '' %>"
+                >
             </div>
             <div class="form-control">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password">
+                <input 
+                    type="password" 
+                    name="password" 
+                    id="password" 
+                    value="<%= oldInputs.password %>"
+                    class="<%= validationErrors.find(err => err.path === 'password') ? 'invalid' : '' %>"
+                >
             </div>
             <div class="form-control">
                 <label for="password">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword">
+                <input 
+                    type="password" 
+                    name="confirmPassword" 
+                    id="confirmPassword" 
+                    value="<%= oldInputs.confirmPassword %>"
+                    class="<%= validationErrors.find(err => err.path === 'confirmPassword') ? 'invalid' : '' %>"
+                >
             </div>
             <button class="btn" type="submit">Signup</button>
         </form>

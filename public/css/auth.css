@@ -22,3 +22,9 @@
   font-size: smaller;
   font-weight: bold;
 }
+
+.invalid {
+  border: 2px solid rgb(255, 127, 127) !important;
+  border-radius: inherit;
+  background-color: rgb(255, 223, 223);
+}

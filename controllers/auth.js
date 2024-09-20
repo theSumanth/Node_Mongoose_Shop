@@ -2,9 +2,12 @@ const crypto = require("crypto");
 
 const bcrypt = require("bcryptjs");
 const sgMail = require("@sendgrid/mail");
+const { validationResult } = require("express-validator");
 
 const User = require("../models/user");
 const { KEYS } = require("../keys");
+const path = require("path");
+const { error } = require("console");
 
 sgMail.setApiKey(KEYS.SENDGRID_API_KEY);
 
@@ -16,6 +19,8 @@ exports.getSignup = (req, res, next) => {
     pageTitle: "Sign Up",
     path: "/signup",
     errorMessage: message,
+    oldInputs: { email: "", password: "", confirmPassword: "" },
+    validationErrors: [],
   });
 };
 
@@ -23,34 +28,45 @@ exports.postSignup = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
+  const errors = validationResult(req);
+
+  console.log(errors.array());
+
+  if (!errors.isEmpty()) {
+    return res.render("auth/signup", {
+      pageTitle: "Sign Up",
+      path: "/signup",
+      errorMessage: errors.array()[0].msg,
+      oldInputs: {
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword,
+      },
+      validationErrors: errors.array(),
+    });
+  }
 
   try {
-    const user = await User.findOne({ email: email });
-    if (user) {
-      req.flash("error", "Email already exists");
-      return res.redirect("/login");
-    } else {
-      const hashedPassword = await bcrypt.hash(password, 12);
-      const newUser = new User({
-        email: email,
-        password: hashedPassword,
-      });
-      await newUser.save();
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const newUser = new User({
+      email: email,
+      password: hashedPassword,
+    });
+    await newUser.save();
 
-      const msg = {
-        to: email,
-        from: KEYS.FROM_EMAIL,
-        subject: "Signup Successfull",
-        text: "Successfully Signed up",
-        html: `
+    const msg = {
+      to: email,
+      from: KEYS.FROM_EMAIL,
+      subject: "Signup Successfull",
+      text: "Successfully Signed up",
+      html: `
           <h1>Sign Up successfull!</h1>
           <p>Thanks for choosing us</p>
         `,
-      };
+    };
 
-      await sgMail.send(msg);
-      return res.redirect("/login");
-    }
+    await sgMail.send(msg);
+    return res.redirect("/login");
   } catch (err) {
     console.log(err);
   }
@@ -64,6 +80,8 @@ exports.getLogin = (req, res, next) => {
     pageTitle: "Login",
     path: "/login",
     errorMessage: message,
+    oldInputs: { email: "", password: "" },
+    validationErrors: [],
   });
 };
 
@@ -72,6 +90,17 @@ exports.postLogin = async (req, res, next) => {
   // res.setHeader('Set-Cookie', 'loggedIn=true; Max-Age:10; Secure');
   const email = req.body.email;
   const password = req.body.password;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.render("auth/login", {
+      pageTitle: "Login",
+      path: "/login",
+      errorMessage: errors.array()[0].msg,
+      oldInputs: { email: email, password: password },
+      validationErrors: errors.array(),
+    });
+  }
 
   try {
     const user = await User.findOne({ email: email });
@@ -87,11 +116,27 @@ exports.postLogin = async (req, res, next) => {
         return res.redirect("/");
       });
     } else {
-      req.flash("error", "Incorrect email or password");
-      return res.redirect("/login");
+      let error = {};
+      if (!user) {
+        error.message = "No User found for the Email";
+        error.path = "email";
+      } else if (!isPasswordCorrect) {
+        error.message = "Password is incorrect";
+        error.path = "password";
+      }
+
+      return res.render("auth/login", {
+        pageTitle: "Login",
+        path: "/login",
+        errorMessage: error.message,
+        oldInputs: { email: email, password: password },
+        validationErrors: [error],
+      });
     }
   } catch (err) {
     console.log(err);
+    req.flash("error", "Something Error has occured");
+    return res.redirect("/login");
   }
 };
 
@@ -113,17 +158,27 @@ exports.getReset = (req, res, next) => {
     pageTitle: "Reset Password",
     path: "/reset",
     errorMessage: message,
+    oldInputs: { email: "" },
+    validationErrors: [],
   });
 };
 
 exports.postReset = async (req, res, next) => {
   const email = req.body.email;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.render("auth/reset", {
+      pageTitle: "Reset Password",
+      path: "/reset",
+      errorMessage: errors.array()[0].msg,
+      oldInputs: { email: email },
+      validationErrors: errors.array(),
+    });
+  }
+
   try {
     const user = await User.findOne({ email: email });
-    if (!user) {
-      req.flash("error", "No user found!");
-      return res.redirect("/reset");
-    }
 
     crypto.randomBytes(32, async (err, Buffer) => {
       if (err) {
@@ -172,6 +227,8 @@ exports.getNewPassword = async (req, res, next) => {
       errorMessage: message,
       token: token,
       userId: user._id,
+      oldInputs: { newPassword: "" },
+      validationErrors: [],
     });
   } else {
     req.flash("error", "Something wrong happened!");
@@ -183,6 +240,19 @@ exports.postNewPassword = async (req, res, next) => {
   const newPassword = req.body.newPassword;
   const token = req.body.token;
   const userId = req.body.userId;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.render("auth/new-password", {
+      pageTitle: "New Password",
+      path: "/new-password",
+      token: token,
+      userId: userId,
+      errorMessage: errors.array()[0].msg,
+      oldInputs: { newPassword: newPassword },
+      validationErrors: errors.array(),
+    });
+  }
 
   try {
     const resetUser = await User.findOne({

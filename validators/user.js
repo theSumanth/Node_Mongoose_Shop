@@ -39,7 +39,7 @@ exports.resetPassword = [
       try {
         const user = await User.findOne({ email: value });
         if (!user) {
-          const error = { message: "No user found this email" };
+          const error = { message: "No user found for this email" };
           throw error;
         }
       } catch (err) {
@@ -49,7 +49,10 @@ exports.resetPassword = [
 ];
 
 exports.newPassword = [
-  body("password", "Password must have length 8 and only be letters and digits")
+  body(
+    "newPassword",
+    "Password must have length 8 and only be letters and digits"
+  )
     .isLength({ min: 8 })
     .isAlphanumeric(),
 ];
