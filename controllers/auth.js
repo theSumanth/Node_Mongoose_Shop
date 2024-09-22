@@ -6,8 +6,6 @@ const { validationResult } = require("express-validator");
 
 const User = require("../models/user");
 const { KEYS } = require("../keys");
-const path = require("path");
-const { error } = require("console");
 
 sgMail.setApiKey(KEYS.SENDGRID_API_KEY);
 
@@ -68,7 +66,9 @@ exports.postSignup = async (req, res, next) => {
     await sgMail.send(msg);
     return res.redirect("/login");
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -135,8 +135,9 @@ exports.postLogin = async (req, res, next) => {
     }
   } catch (err) {
     console.log(err);
-    req.flash("error", "Something Error has occured");
-    return res.redirect("/login");
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -146,7 +147,9 @@ exports.postLogout = async (req, res, next) => {
       res.redirect("/");
     });
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -183,6 +186,13 @@ exports.postReset = async (req, res, next) => {
     crypto.randomBytes(32, async (err, Buffer) => {
       if (err) {
         console.log(err);
+        return res.status(422).render("auth/reset", {
+          pageTitle: "Reset Password",
+          path: "/reset",
+          errorMessage: err.message,
+          oldInputs: { email: email },
+          validationErrors: [],
+        });
       }
       const token = Buffer.toString("hex");
       user.resetToken = token;
@@ -205,7 +215,9 @@ exports.postReset = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.redirect("/reset");
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -273,6 +285,8 @@ exports.postNewPassword = async (req, res, next) => {
     await resetUser.save();
     return res.redirect("/login");
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };

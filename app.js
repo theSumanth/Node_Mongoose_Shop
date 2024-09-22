@@ -35,31 +35,47 @@ app.use(
     saveUninitialized: false,
     resave: false,
     store: store,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
   })
 );
 
 app.use(flash());
-
-app.use(async (req, res, next) => {
-  try {
-    const user = await User.findById(req.session.user);
-    req.user = user;
-    next();
-  } catch (err) {
-    console.log(err);
-  }
-});
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
   next();
 });
 
+app.use(async (req, res, next) => {
+  try {
+    if (req.session.user) {
+      const user = await User.findById(req.session.user);
+      req.user = user;
+    }
+    next();
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.use("/500", errorController.get500);
 app.use(errorController.get404);
+
+app.use((error, req, res, next) => {
+  const statusCode = error.httpStatusCode || 500;
+  const message = error.message || "Something Error has occured";
+  return res.status(statusCode).render("500", {
+    pageTitle: "Error occured",
+    path: "/500",
+    errorMessage: message,
+  });
+});
 
 mongoose
   .connect(KEYS.MONGO_CONNECTION_URI)
