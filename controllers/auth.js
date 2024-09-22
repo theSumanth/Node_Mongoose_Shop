@@ -33,7 +33,7 @@ exports.postSignup = async (req, res, next) => {
   console.log(errors.array());
 
   if (!errors.isEmpty()) {
-    return res.render("auth/signup", {
+    return res.status(422).render("auth/signup", {
       pageTitle: "Sign Up",
       path: "/signup",
       errorMessage: errors.array()[0].msg,
@@ -93,7 +93,7 @@ exports.postLogin = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.render("auth/login", {
+    return res.status(422).render("auth/login", {
       pageTitle: "Login",
       path: "/login",
       errorMessage: errors.array()[0].msg,
@@ -168,7 +168,7 @@ exports.postReset = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.render("auth/reset", {
+    return res.status(422).render("auth/reset", {
       pageTitle: "Reset Password",
       path: "/reset",
       errorMessage: errors.array()[0].msg,
@@ -243,7 +243,7 @@ exports.postNewPassword = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.render("auth/new-password", {
+    return res.status(422).render("auth/new-password", {
       pageTitle: "New Password",
       path: "/new-password",
       token: token,

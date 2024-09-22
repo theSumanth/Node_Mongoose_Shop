@@ -21,3 +21,22 @@
 .form-control textarea:focus {
   outline-color: #00695c;
 }
+
+.error {
+  width: 20rem;
+  max-width: 90%;
+  margin: auto;
+  display: block;
+  text-align: center;
+  padding: 10px;
+  color: rgb(156, 18, 18);
+  background-color: rgb(255, 164, 164);
+  font-size: smaller;
+  font-weight: bold;
+}
+
+.invalid {
+  border: 2px solid rgb(255, 127, 127) !important;
+  border-radius: inherit;
+  background-color: rgb(255, 223, 223);
+}
