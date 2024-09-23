@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const Order = require("../models/order");
+const { generateInvoice } = require("../util/pdfGenerator");
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -129,6 +130,29 @@ exports.getOrders = async (req, res, next) => {
       pageTitle: "Your Orders",
       orders: orders,
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.getOrderInvoice = async (req, res, next) => {
+  const orderId = req.params.orderId;
+
+  try {
+    const order = await Order.findById(orderId).populate({
+      path: "products.productId",
+      select: "title price",
+    });
+    if (!order) {
+      return next(new Error("No order found!"));
+    }
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      return next(new Error("Unauthorized"));
+    }
+
+    generateInvoice(orderId, order, req, res);
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;

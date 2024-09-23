@@ -8,6 +8,7 @@ yarn-error.log*
 # Dependency directories
 node_modules/
 keys/
+images/
 jspm_packages/
 
 # Optional npm cache directory
