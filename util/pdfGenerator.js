@@ -5,7 +5,7 @@ const pdfDocument = require("pdfkit");
 
 const { appDir } = require("../util/file");
 
-exports.generateInvoice = (orderId, order, req, res) => {
+const generateInvoice = (orderId, order, req, res) => {
   const pdfDoc = new pdfDocument();
   const invoiceName = "invoice-" + orderId + ".pdf";
   const invoicePath = path.join(appDir, "data", "invoices", invoiceName);
@@ -53,3 +53,5 @@ exports.generateInvoice = (orderId, order, req, res) => {
     .text(totalPrice);
   pdfDoc.end();
 };
+
+exports.generateInvoice = generateInvoice;

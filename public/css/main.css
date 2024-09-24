@@ -242,3 +242,24 @@ form {
     display: none;
   }
 }
+
+.pagination {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.pagination a {
+  text-decoration: none;
+  padding: 0.5rem;
+  color: #00695c;
+  margin: 0.5rem;
+  border: #00695c 1.5px solid;
+  border-radius: 4px;
+}
+
+.pagination a:hover,
+.pagination a:active,
+.pagination a.active {
+  background-color: #00695c;
+  color: white;
+}
