@@ -2,6 +2,8 @@ const Product = require("../models/product");
 
 const { validationResult } = require("express-validator");
 
+const fileUtility = require("../util/file");
+
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
@@ -43,7 +45,6 @@ exports.postAddProduct = async (req, res, next) => {
       hasError: true,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
       },
@@ -61,7 +62,6 @@ exports.postAddProduct = async (req, res, next) => {
       imageUrl: imageUrl,
       userId: req.user._id,
     });
-    console.log("test");
     await product.save();
     console.log("Created Product");
     res.redirect("/admin/products");
@@ -100,11 +100,10 @@ exports.getEditProduct = async (req, res, next) => {
 };
 
 exports.postEditProduct = async (req, res, next) => {
-  console.log("post edit");
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const updatedImage = req.file;
   const updatedDesc = req.body.description;
 
   const errors = validationResult(req);
@@ -117,7 +116,6 @@ exports.postEditProduct = async (req, res, next) => {
       product: {
         title: updatedTitle,
         price: updatedPrice,
-        imageUrl: updatedImageUrl,
         description: updatedDesc,
         _id: prodId,
       },
@@ -127,14 +125,20 @@ exports.postEditProduct = async (req, res, next) => {
   }
 
   try {
+    const editedProduct = {
+      title: updatedTitle,
+      price: updatedPrice,
+      description: updatedDesc,
+    };
+    if (updatedImage) {
+      const product = await Product.findById(prodId);
+      fileUtility.deleteFile(product.imageUrl);
+      const imageUrl = `/${updatedImage.path}`.replace(/\\/g, "/");
+      editedProduct.imageUrl = imageUrl;
+    }
     await Product.updateOne(
       { _id: prodId, userId: req.user._id },
-      {
-        title: updatedTitle,
-        price: updatedPrice,
-        description: updatedDesc,
-        imageUrl: updatedImageUrl,
-      }
+      editedProduct
     );
     console.log("UPDATED PRODUCT!");
     res.redirect("/admin/products");
@@ -163,6 +167,8 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   try {
+    const product = await Product.findById(prodId);
+    fileUtility.deleteFile(product.imageUrl);
     await Product.deleteOne({ _id: prodId, userId: req.user._id });
     console.log("DELETED THE PRODUCT");
     res.redirect("/admin/products");

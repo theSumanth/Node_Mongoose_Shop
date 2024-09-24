@@ -1,14 +1,18 @@
+const fs = require("fs");
 const path = require("path");
 
 const pdfDocument = require("pdfkit");
 
+const { appDir } = require("../util/file");
+
 exports.generateInvoice = (orderId, order, req, res) => {
   const pdfDoc = new pdfDocument();
   const invoiceName = "invoice-" + orderId + ".pdf";
-  const invoicePath = path.join("data", "invoices", invoiceName);
+  const invoicePath = path.join(appDir, "data", "invoices", invoiceName);
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Deposition", invoiceName);
 
+  pdfDoc.pipe(fs.createWriteStream(invoicePath));
   pdfDoc.pipe(res);
   pdfDoc.fontSize(28).text("Invoice", {
     underline: true,
